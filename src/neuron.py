@@ -24,6 +24,16 @@ class Neuron:
       
     iterate(self)
 
+  def find_children(self, callback):
+    def iterate(neuron):
+      for syn in neuron.synapses:
+        for next_neuron in syn.next_neurons:
+          if callback(neuron, next_neuron, syn):
+            return neuron
+        iterate(neuron)
+      
+    iterate(self)
+
   def mutate(self):
     synapse_index = random()
     self.synapses[synapse_index].weight = random()
@@ -35,14 +45,14 @@ class Neuron:
     iterate_children_recursive(lambda neuron, next_neuron: 
       neurons.append(next_neuron) if not any(neuron.id == next_neuron.id for neuron in neurons) else neuron)
     
-    neurons.sort(id)
+    neurons.sort(lambda n: n.id)
     last_neuron_id = neurons[neurons.count].id
 
     gen_index = randrange(1, neurons.count - 2)
 
     def gen_neuron():
       neuron = Neuron(gen_index, [Synapse(random(), random(), [neurons[gen_index + 1]])])
-      neurons.insert(gen_index, gen_neuron)
+      neurons.insert(gen_index, neuron)
       neurons[gen_index - 1].synapses.append(Synapse(random(), random(), [neuron]))
       for i in range(gen_index, neurons.count): neurons[i].id += 1
 
@@ -57,6 +67,7 @@ class Neuron:
                 not any(neuron.id == next_neuron.id for neuron in neurons), neurons)
               if new_neuron_bond.count > 0:
                 next_neuron.synapses.append(Synapse(random(), random(), [new_neuron_bond]))
+                next_neuron.ReLU()
                 return True
         return False
 
