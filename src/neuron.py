@@ -77,8 +77,5 @@ class Neuron:
       return success
 
     should_gen_node = random() > 0.5
-    if should_gen_node:
-      gen_neuron()
-    else:
-      if not gen_synapse():
-        gen_neuron()
+    if should_gen_node: gen_neuron()
+    elif not gen_synapse(): gen_neuron()
