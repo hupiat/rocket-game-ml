@@ -14,7 +14,8 @@ def normalize(datas):
 
 def ask_model(datas):
   normalize(datas)
-  for output in genetic.generation_train(datas): yield output > 0.5
+  for output in genetic.generation_train(datas): 
+    yield output > 0.5
 
 def step_generation(final_datas):
   normalize(final_datas)

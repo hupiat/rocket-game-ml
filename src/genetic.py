@@ -22,11 +22,12 @@ class Genetic:
     self.root_neurons = []
     for _ in range(0, self.generation_count):
       self.root_neurons.append(Neuron(
-        0, self.map_data(Data(0, random(), random(), random(), random(), random(), random()))))
+        0, self.map_data(Data(0, random(), random(), random(), random(), random()))))
 
   def generation_train(self, datas):
-    for i in range(0, self.root_neurons):
-      self.root_neurons[i].synapses = self.map_data(datas[i])
+    for i in range(0, len(datas)):
+      data = self.map_data(datas[i])
+      self.root_neurons[i].synapses = list(data)
       self.root_neurons[i].ReLU()
       yield self.root_neurons[i].output
       
