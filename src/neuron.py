@@ -1,4 +1,4 @@
-from random import random, randrange
+from random import random, randint
 from synapse import Synapse
 
 class Neuron:
@@ -24,7 +24,7 @@ class Neuron:
       
     iterate(self)
 
-  def find_children(self, callback):
+  def find_child(self, callback):
     def iterate(neuron):
       for syn in neuron.synapses:
         for next_neuron in syn.next_neurons:
@@ -48,7 +48,7 @@ class Neuron:
     neurons.sort(lambda n: n.id)
     last_neuron_id = neurons[len(neurons)].id
 
-    gen_index = randrange(1, len(neurons) - 2)
+    gen_index = randint(1, len(neurons) - 2)
 
     def gen_neuron():
       neuron = Neuron(gen_index, [Synapse(random(), random(), [neurons[gen_index + 1]])])

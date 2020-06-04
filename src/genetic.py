@@ -22,7 +22,8 @@ class Genetic:
   def generation_gen(self):
     self.root_neurons = []
     for _ in range(0, self.generation_count):
-      self.root_neurons.append(Neuron(0, self.map_data(Data(0, random(), random(), random(), random(), random(), random()))))
+      self.root_neurons.append(Neuron(
+        0, self.map_data(Data(0, random(), random(), random(), random(), random(), random()))))
 
   def generation_train(self, datas):
     for i in range(0, self.root_neurons):
@@ -50,19 +51,26 @@ class Genetic:
         self.root_neurons[j].iterate_children_recursive(
           lambda neuron, next_neuron, syn: s_genes.append((neuron, next_neuron, syn)))
         
-        f_genes.sort(lambda g: g[0].id)
-        s_genes.sort(lambda g: g[0].id)
-
         for gene in f_genes:
           for o_gene in s_genes:
             if gene[0].id == o_gene[0].id and gene[1].id == o_gene[1].id or random() <= self.crossover_unique_gene_transfer_prob:
-              match_neuron = root_neuron.find_children(lambda neuron: neuron.id == gene[0].id)
+              match_neuron = root_neuron.find_child(lambda n: n.id == o_gene[0].id) if o_gene[0].id != 0 else root_neuron 
+              should_insert_at_root = False 
               if match_neuron is None:
-                raise Exception('Neuron with id {gene[0].id} was not inserted in place before being processed')
-              new_neuron = Neuron(match_neuron.id + len(map(lambda n: 
+                match_neuron = Neuron(o_gene[0].id, [])
+                match_ancestor_genes = filter(lambda g: g[1].id == match_neuron.id, s_genes)
+                if len(match_ancestor_genes) > 0: should_insert_at_root = match_ancestor_genes[0]
+
+              new_neuron = Neuron(o_gene[1].id + len(map(lambda n: 
                 map(lambda s: s.next_neurons, n.synapses), match_neuron)) + 1, [])
-              new_syn = Synapse(gene[3].input + o_gene[3].input / 2, gene[3].weight + o_gene[3].weight / 2, [new_neuron])
+              new_syn = Synapse(gene[3].input + o_gene[3].input / 2, 
+                gene[3].weight + o_gene[3].weight / 2, [new_neuron])
+
               match_neuron.synapses.append(new_syn)
+              if should_insert_at_root is not False: 
+                should_insert_at_root[2].next_neurons = [match_neuron]
+                root_neuron.synapses.append(should_insert_at_root[2])
+
           if len(new_gen) == self.generation_count: break
 
     self.root_neurons = new_gen
