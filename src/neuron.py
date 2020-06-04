@@ -8,7 +8,7 @@ class Neuron:
     for syn in self.synapses:
       if syn.input < 0: syn.input = 0
       self.output += syn.input * syn.weight
-      self.output /= len(self.synapses)
+    self.output /= len(self.synapses)
 
   def __init__(self, id, synapses):
     self.id = id
