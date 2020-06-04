@@ -14,7 +14,6 @@ class Genetic:
     return [
       Synapse(data.rocket_top, 1, []),
       Synapse(data.rocket_left, 1, []),
-      Synapse(data.rocket_speed, 1, []),
       Synapse(data.wall_left, 1, []),
       Synapse(data.wall_top, 1, []),
     ]
