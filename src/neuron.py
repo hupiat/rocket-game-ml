@@ -73,7 +73,6 @@ class Neuron:
 
       success = explore(ascending_exploration)
       if not success: explore(not ascending_exploration)
-
       return success
 
     should_gen_node = random() > 0.5
