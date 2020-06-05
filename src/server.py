@@ -9,7 +9,6 @@ from collections import namedtuple
 PATH_ASK = '/ask_model'
 PATH_STEP = '/step_generation'
 PATH_COUNT = '/count_generation'
-PATH_COUNT_GEN = '/count_actual_generation'
 
 class Handler(SimpleHTTPRequestHandler): 
   def end_headers (self):
@@ -43,10 +42,6 @@ class Handler(SimpleHTTPRequestHandler):
       self.send_response(200)
       self.end_headers()
       self.wfile.write(bytes(str(Genetic.generation_count), 'utf-8'))
-    elif url.path == PATH_COUNT:
-      self.send_response(200)
-      self.end_headers()
-      self.wfile.write(bytes(str(Genetic.actual_gen_count), 'utf-8'))
     else:
       self.send_response(404)
       self.end_headers()
