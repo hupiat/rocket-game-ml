@@ -38,7 +38,7 @@ class Neuron:
   def mutate(self):
     synapse_index = random()
     self.synapses[synapse_index].weight = random()
-    self.ReLU()
+    self.iterate_children_recursive(lambda n: n.ReLU())
 
   def mutate_struct(self):
     neurons = [self]
@@ -80,4 +80,4 @@ class Neuron:
     should_gen_node = random() > 0.5
     if should_gen_node: gen_neuron()
     elif not gen_synapse(): gen_neuron()
-    self.ReLU()
+    self.iterate_children_recursive(lambda n: n.ReLU())
