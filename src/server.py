@@ -11,8 +11,12 @@ PATH_STEP = '/step_generation'
 PATH_COUNT = '/count_generation'
 
 class Handler(SimpleHTTPRequestHandler): 
+  def end_headers (self):
+    self.send_header('Access-Control-Allow-Origin', '*')
+    SimpleHTTPRequestHandler.end_headers(self)
 
   def to_data(self, json_datas):
+    print(json_datas)
     dictionaries = json.loads(json_datas)
     for dict in dictionaries:
       yield Data(dict['id'], dict['score'], dict['rocket_top'], 
@@ -32,8 +36,8 @@ class Handler(SimpleHTTPRequestHandler):
         predictions = list(ask_model(datas))
         self.wfile.write(bytes(str(predictions), 'utf-8'))
       elif hasDatas:
-        step_generation(datas)
         self.end_headers()
+        step_generation(datas)
     elif url.path == PATH_COUNT:
       self.send_response(200)
       self.end_headers()

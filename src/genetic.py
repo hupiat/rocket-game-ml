@@ -5,7 +5,7 @@ from neuron import Neuron
 
 class Genetic:
 
-  generation_count = 20
+  generation_count = 10
   mutation_prob = 0.2
   mutation_struct_prob = 0.3
   crossover_unique_gene_transfer_prob = 0.2
@@ -27,9 +27,10 @@ class Genetic:
   def generation_train(self, datas):
     for i in range(0, len(datas)):
       data = self.map_data(datas[i])
-      self.root_neurons[i].synapses = list(data)
-      self.root_neurons[i].ReLU()
-      yield self.root_neurons[i].output
+      for neuron in self.root_neurons:
+        neuron.synapses = list(data)
+        neuron.ReLU()
+        yield neuron.output
       
   def generation_crossover(self, datas):
     new_gen = []
