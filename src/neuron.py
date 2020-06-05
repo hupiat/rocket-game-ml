@@ -3,8 +3,6 @@ from synapse import Synapse
 
 class Neuron:
 
-  next_synapses = []
-
   def ReLU(self):
     self.output = 0
     for syn in self.synapses:
