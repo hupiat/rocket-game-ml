@@ -21,8 +21,7 @@ class Neuron:
       for syn in neuron.synapses:
         for next_neuron in syn.next_neurons:
           callback(neuron, next_neuron, syn)
-        iterate(neuron)
-      
+        iterate(neuron) 
     iterate(self)
 
   def find_child(self, callback):
@@ -31,8 +30,7 @@ class Neuron:
         for next_neuron in syn.next_neurons:
           if callback(neuron, next_neuron, syn):
             return neuron
-        iterate(neuron)
-      
+        iterate(neuron) 
     iterate(self)
 
   def mutate(self):
@@ -60,7 +58,6 @@ class Neuron:
 
     def gen_synapse():
       ascending_exploration = random() > 0.5
-
       def explore(ascending):
         for i in range(gen_index if ascending else 0, len(neurons) if ascending else gen_index):
           for syn in neurons[i].synapses:
@@ -72,7 +69,6 @@ class Neuron:
                 next_neuron.ReLU()
                 return True
         return False
-
       success = explore(ascending_exploration)
       if not success: explore(not ascending_exploration)
       return success
