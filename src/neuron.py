@@ -34,7 +34,7 @@ class Neuron:
     iterate(self)
 
   def mutate(self):
-    synapse_index = random()
+    synapse_index = randint(0, len(self.synapses))
     self.synapses[synapse_index].weight = random()
     self.iterate_children_recursive(lambda n: n.ReLU())
 
