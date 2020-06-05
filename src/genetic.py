@@ -13,7 +13,7 @@ class Genetic:
   def map_data(self, data):
     return [
       Synapse(data.rocket_top, 1, []),
-      Synapse(data.rocket_left, 1, []),
+      Synapse(data.wall_direction, 1, []),
       Synapse(data.wall_left, 1, []),
       Synapse(data.wall_top, 1, []),
     ]
@@ -22,7 +22,7 @@ class Genetic:
     self.root_neurons = []
     for _ in range(0, self.generation_count):
       self.root_neurons.append(Neuron(
-        0, self.map_data(Data(0, random(), random(), random(), random(), random()))))
+        0, self.map_data(Data(0, random(), random(), 1 if random() > 0.5 else 0, random(), random()))))
 
   def generation_train(self, datas):
     for i in range(0, len(datas)):

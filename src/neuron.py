@@ -3,9 +3,12 @@ from synapse import Synapse
 
 class Neuron:
 
+  next_synapses = []
+
   def ReLU(self):
     self.output = 0
     for syn in self.synapses:
+      if len(syn.next_neurons) == 0: continue
       if syn.input < 0: syn.input = 0
       self.output += syn.input * syn.weight
     self.output /= len(self.synapses)
@@ -51,9 +54,10 @@ class Neuron:
     gen_index = randint(1, len(neurons) - 2)
 
     def gen_neuron():
-      neuron = Neuron(gen_index, [Synapse(random(), random(), [neurons[gen_index + 1]])])
+      neuron = Neuron(gen_index, [Synapse(random(), random(), []), 
+        Synapse(neurons[gen_index].output, random(), [neurons[gen_index + 1]])])
       neurons.insert(gen_index, neuron)
-      neurons[gen_index - 1].synapses.append(Synapse(random(), random(), [neuron]))
+      neurons[gen_index - 1].synapses.append(Synapse(neurons[gen_index - 1].output, random(), [neuron]))
       for i in range(gen_index, len(neurons)): neurons[i].id += 1
 
     def gen_synapse():
@@ -66,7 +70,7 @@ class Neuron:
               new_neuron_bond = filter(lambda neuron: 
                 not any(neuron.id == next_neuron.id for neuron in neurons), neurons)
               if len(new_neuron_bond) > 0:
-                next_neuron.synapses.append(Synapse(random(), random(), [new_neuron_bond]))
+                next_neuron.synapses.append(Synapse(next_neuron.output, random(), [new_neuron_bond]))
                 next_neuron.ReLU()
                 return True
         return False

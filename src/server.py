@@ -11,12 +11,12 @@ PATH_STEP = '/step_generation'
 PATH_COUNT = '/count_generation'
 
 class Handler(SimpleHTTPRequestHandler): 
-  
+
   def to_data(self, json_datas):
     dictionaries = json.loads(json_datas)
     for dict in dictionaries:
       yield Data(dict['id'], dict['score'], dict['rocket_top'], 
-        dict['rocket_left'], dict['wall_left'], dict['wall_top'])
+        dict['wall_direction'], dict['wall_left'], dict['wall_top'])
 
   def do_GET(self):
     url = urlparse(self.path)
