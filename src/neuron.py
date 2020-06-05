@@ -6,7 +6,7 @@ class Neuron:
   def ReLU(self):
     self.output = 0
     for syn in self.synapses:
-      if len(syn.next_neurons) == 0: continue
+      if len(syn.next_neurons) != 0: continue
       if syn.input < 0: syn.input = 0
       self.output += syn.input * syn.weight
     self.output /= len(self.synapses)
