@@ -25,16 +25,18 @@ class Handler(SimpleHTTPRequestHandler):
     def do_GET(self):
         url = urlparse(self.path)
         if url.path == PATH_ASK or url.path == PATH_STEP:
+            parsed = parse_qs(url.query)
             hasDatas = False
             try:
-                datas = list(self.to_data(parse_qs(url.query).get('datas')[0]))
+                datas = list(self.to_data(parsed.get('datas')[0]))
                 hasDatas = datas is not None and len(datas) != 0
             except TypeError:
                 pass
             self.send_response(200 if hasDatas else 404)
             if url.path == PATH_ASK and hasDatas:
                 self.end_headers()
-                predictions = list(ask_model(datas))
+                predictions = list(ask_model(datas, parsed.get(
+                    'max_height'), parsed.get('max_width')))
                 self.wfile.write(bytes(str(predictions), 'utf-8'))
             elif hasDatas:
                 self.end_headers()

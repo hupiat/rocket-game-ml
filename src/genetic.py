@@ -17,7 +17,7 @@ class Genetic:
         self.wall_left_weight = 1
         self.wall_length_weight = 1
 
-    def adjust_weight(self, final_datas):
+    def adjust_weights(self, final_datas):
         def mse(index, label):
             total = 0
             for i in range(len(final_datas)):
