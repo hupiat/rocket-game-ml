@@ -36,7 +36,7 @@ class Handler(SimpleHTTPRequestHandler):
             if url.path == PATH_ASK and hasDatas:
                 self.end_headers()
                 predictions = list(ask_model(datas, parsed.get(
-                    'max_height'), parsed.get('max_width')))
+                    'max_height')[0], parsed.get('max_width')[0]))
                 self.wfile.write(bytes(str(predictions), 'utf-8'))
             elif hasDatas:
                 self.end_headers()
