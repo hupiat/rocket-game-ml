@@ -71,7 +71,7 @@ class Neuron:
             ascending_exploration = random() > 0.5
 
             def explore(ascending):
-                for i in range(gen_index if ascending else gen_index, len(neurons) if ascending else 0):
+                for i in range(gen_index, len(neurons) if ascending else 0):
                     for syn in neurons[i].synapses:
                         for next_neuron in syn.next_neurons:
                             new_neuron_bond = [not any(o_neuron.id == next_neuron.id or o_neuron.id == neurons[i].id
