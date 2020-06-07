@@ -5,14 +5,21 @@ from synapse import Synapse
 class Neuron:
 
     def ReLU(self):
-        self.output = 0
-        for syn in self.synapses:
-            if len(syn.next_neurons) != 0:
-                continue
-            if syn.input < 0:
-                syn.input = 0
-            self.output += syn.input * syn.weight
-        self.output /= len(self.synapses)
+        def compute(neuron):
+            neuron.output = 0
+            for syn in neuron.synapses:
+                if len(syn.next_neurons) != 0:
+                    continue
+                if syn.input < 0:
+                    syn.input = 0
+                neuron.output += syn.input * syn.weight
+            neuron.output /= len(neuron.synapses)
+            for next_neuron in syn.next_neurons:
+                for syn in next_neuron.synapses:
+                    if len(syn.next_neuron) != 0:
+                        syn.input = neuron.output
+                compute(next_neuron)
+        compute(self)
 
     def __init__(self, id, synapses):
         self.id = id
@@ -39,13 +46,16 @@ class Neuron:
     def mutate(self):
         synapse_index = randint(0, len(self.synapses) - 1)
         self.synapses[synapse_index].weight = random()
-        self.iterate_children_recursive(lambda n, next, syn: n.ReLU())
+        self.ReLU()
 
     def mutate_struct(self):
         neurons = [self]
 
-        self.iterate_children_recursive(lambda neuron, next_neuron, syn:
-                                        neurons.append(next_neuron) if not any(neuron.id == next_neuron.id for neuron in neurons) else neuron)
+        def pick_neuron(neuron, next_neuron, syn):
+            if not any(neuron.id == next_neuron.id for neuron in neurons):
+                neurons.append(next_neuron)
+
+        self.iterate_children_recursive(pick_neuron)
 
         sorted(neurons, key=lambda n: n.id)
         last_neuron_id = neurons[len(neurons) - 1].id
@@ -74,12 +84,11 @@ class Neuron:
                 for i in range(gen_index, len(neurons) if ascending else 0):
                     for syn in neurons[i].synapses:
                         for next_neuron in syn.next_neurons:
-                            new_neuron_bond = [not any(o_neuron.id == next_neuron.id or o_neuron.id == neurons[i].id
+                            new_neuron_bond = [not any(o_neuron.id == next_neuron.id or o_neuron.id <= i
                                                        for o_neuron in neurons) for neuron in neurons]
                             if new_neuron_bond != False and len(new_neuron_bond) > 0:
                                 next_neuron.synapses.append(
                                     Synapse(next_neuron.output, random(), new_neuron_bond))
-                                next_neuron.ReLU()
                                 return True
                 return False
             success = explore(ascending_exploration)
@@ -92,4 +101,4 @@ class Neuron:
             gen_neuron()
         elif not gen_synapse():
             gen_neuron()
-        self.iterate_children_recursive(lambda n, next, syn: n.ReLU())
+        self.ReLU()

@@ -20,7 +20,8 @@ class Handler(SimpleHTTPRequestHandler):
         dictionaries = json.loads(json_datas)
         for dict in dictionaries:
             yield Data(dict['id'], dict['score'], dict['rocket_top'],
-                       dict['wall_direction'], dict['wall_left'], dict['wall_length'])
+                       dict['wall_direction'], dict['wall_left'], dict['wall_length'],
+                       dict['monster_top'], dict['monster_left'])
 
     def do_GET(self):
         url = urlparse(self.path)
@@ -35,8 +36,8 @@ class Handler(SimpleHTTPRequestHandler):
             self.send_response(200 if hasDatas else 404)
             if url.path == PATH_ASK and hasDatas:
                 self.end_headers()
-                predictions = list(ask_model(datas, parsed.get(
-                    'max_height')[0], parsed.get('max_width')[0]))
+                predictions = list(ask_model(datas, float(parsed.get(
+                    'max_height')[0]), float(parsed.get('max_width')[0])))
                 self.wfile.write(bytes(str(predictions), 'utf-8'))
             elif hasDatas:
                 self.end_headers()

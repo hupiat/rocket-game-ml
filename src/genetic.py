@@ -6,16 +6,18 @@ from neuron import Neuron
 
 class Genetic:
 
-    count_individuals = 10
+    count_individuals = 5
+
     mutation_prob = 0.8
     mutation_struct_prob = 0.5
     crossover_unique_gene_transfer_prob = 0.2
 
-    def __init__(self):
-        self.rocket_top_weight = 2
-        self.wall_direction_weight = 1
-        self.wall_left_weight = 1
-        self.wall_length_weight = 1
+    rocket_top_weight = 1
+    wall_direction_weight = 0.5
+    wall_left_weight = 0.5
+    wall_length_weight = 0.5
+    monster_top_weight = 1
+    monster_left_weight = 1
 
     def adjust_weights(self, final_datas):
         def mse(index, label):
@@ -42,6 +44,8 @@ class Genetic:
         mse(max_score[1], 'wall_direction')
         mse(max_score[1], 'wall_left')
         mse(max_score[1], 'wall_length')
+        mse(max_score[1], 'monster_top')
+        mse(max_score[1], 'monster_left')
 
     def map_data(self, data):
         return [
@@ -49,13 +53,16 @@ class Genetic:
             Synapse(data.wall_direction, self.wall_direction_weight, []),
             Synapse(data.wall_left, self.wall_left_weight, []),
             Synapse(data.wall_length, self.wall_length_weight, []),
+            Synapse(data.monster_top, self.monster_top_weight, []),
+            Synapse(data.monster_left, self.monster_left_weight, []),
         ]
 
     def generation_gen(self):
         self.root_neurons = []
         for _ in range(0, self.count_individuals):
             self.root_neurons.append(Neuron(
-                0, self.map_data(Data(0, random(), random(), random(), 1 if random() > 0.5 else 0, random()))))
+                0, self.map_data(Data(0, random(), random(), random(),
+                                      1 if random() > 0.5 else 0, random(), random(), random()))))
 
     def generation_train(self, datas):
         self.last_input_datas = datas
@@ -69,10 +76,10 @@ class Genetic:
         new_gen = []
 
         for i in range(0, self.count_individuals):
-            should_mutate = random() <= self.mutation_prob
+            should_mutate = random() < self.mutation_prob
             if should_mutate:
                 self.root_neurons[i].mutate()
-            should_struct_mutate = random() <= self.mutation_struct_prob
+            should_struct_mutate = random() < self.mutation_struct_prob
             if should_struct_mutate:
                 self.root_neurons[i].mutate_struct()
 
@@ -120,5 +127,4 @@ class Genetic:
                     if len(new_gen) == self.count_individuals:
                         break
 
-        self.adjust_weight(datas)
         self.root_neurons = new_gen
