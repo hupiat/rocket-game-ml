@@ -6,14 +6,16 @@ class Neuron:
 
     def ReLU(self):
         def compute(neuron):
+            i = 0
             neuron.output = 0
             for syn in neuron.synapses:
-                if len(syn.next_neurons) != 0:
+                if syn.input == 0 or len(syn.next_neurons) != 0:
                     continue
+                i += 1
                 if syn.input < 0:
                     syn.input = 0
                 neuron.output += syn.input * syn.weight
-            neuron.output /= len(neuron.synapses)
+            neuron.output /= i
             for next_neuron in syn.next_neurons:
                 for syn in next_neuron.synapses:
                     if len(syn.next_neuron) != 0:
@@ -48,7 +50,7 @@ class Neuron:
         self.synapses[synapse_index].weight = random()
         self.ReLU()
 
-    def mutate_struct(self):
+    def mutate_struct(self, genetic):
         neurons = [self]
 
         def pick_neuron(neuron, next_neuron, syn):
@@ -66,14 +68,14 @@ class Neuron:
             gen_index = 0
 
         def gen_neuron():
-            neuron = Neuron(gen_index, [Synapse(random(), random(), [])])
+            neuron = Neuron(gen_index, genetic.map_data(genetic.gen_data))
             synapse = Synapse(neurons[gen_index].output, random(), [])
             if len(neurons) > gen_index + 1:
                 synapse.next_neurons.append(neurons[gen_index + 1])
             neuron.synapses.append(synapse)
             neurons.insert(gen_index, neuron)
             neurons[gen_index - 1].synapses.append(
-                Synapse(neurons[gen_index - 1].output, random(), [neuron]))
+                Synapse(random(), random(), [neuron]))
             for i in range(gen_index, len(neurons)):
                 neurons[i].id += 1
 

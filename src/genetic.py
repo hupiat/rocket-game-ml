@@ -20,12 +20,19 @@ class Genetic:
     monster_left_weight = 1
 
     def adjust_weights(self, final_datas):
+        max_score = (0, 0)
+        for i in range(len(final_datas)):
+            if final_datas[i].score > max_score[0]:
+                max_score[0] = final_datas[i].score
+                max_score[1] = i
+
         def mse(index, label):
             total = 0
             for i in range(len(final_datas)):
                 diff = final_datas[i][label] - self.last_input_datas[i][label]
                 total += diff * diff
             total /= len(final_datas)
+            total -= 1 - 100 / max_score[0]
             success = self.root_neurons[index].output > 0.5
             if final_datas[i].wall_direction == 0:
                 success = self.root_neurons[index].output <= 0.5
@@ -33,36 +40,32 @@ class Genetic:
                 self[label + '_weight'] -= total
             else:
                 self[label + '_weight'] += total
+        for input in self.last_input_datas[0]:
+            mse(max_score[1], input.label)
 
-        max_score = (0, 0)
-        for i in range(len(final_datas)):
-            if final_datas[i].score > max_score[0]:
-                max_score[0] = final_datas[i].score
-                max_score[1] = i
-
-        mse(max_score[1], 'rocket_top')
-        mse(max_score[1], 'wall_direction')
-        mse(max_score[1], 'wall_left')
-        mse(max_score[1], 'wall_length')
-        mse(max_score[1], 'monster_top')
-        mse(max_score[1], 'monster_left')
+    def gen_data(self):
+        return Data(0, random(), random(), random(),
+                    1 if random() > 0.5 else 0, random(), random(), random())
 
     def map_data(self, data):
         return [
-            Synapse(data.rocket_top, self.rocket_top_weight, []),
-            Synapse(data.wall_direction, self.wall_direction_weight, []),
-            Synapse(data.wall_left, self.wall_left_weight, []),
-            Synapse(data.wall_length, self.wall_length_weight, []),
-            Synapse(data.monster_top, self.monster_top_weight, []),
-            Synapse(data.monster_left, self.monster_left_weight, []),
+            Synapse('rocket_top', data.rocket_top, self.rocket_top_weight, []),
+            Synapse('wall_direction', data.wall_direction,
+                    self.wall_direction_weight, []),
+            Synapse('wall_left', data.wall_left, self.wall_left_weight, []),
+            Synapse('wall_length', data.wall_length,
+                    self.wall_length_weight, []),
+            Synapse('monster_top', data.monster_top,
+                    self.monster_top_weight, []),
+            Synapse('monster_left', data.monster_left,
+                    self.monster_left_weight, []),
         ]
 
     def generation_gen(self):
         self.root_neurons = []
         for _ in range(0, self.count_individuals):
             self.root_neurons.append(Neuron(
-                0, self.map_data(Data(0, random(), random(), random(),
-                                      1 if random() > 0.5 else 0, random(), random(), random()))))
+                0, self.map_data(self.gen_data())))
 
     def generation_train(self, datas):
         self.last_input_datas = datas
@@ -101,30 +104,30 @@ class Genetic:
 
                 for gene in f_genes:
                     for o_gene in s_genes:
-                        if gene[0].id == o_gene[0].id and gene[1].id == o_gene[1].id or random() <= self.crossover_unique_gene_transfer_prob:
+                        if gene[0].id == o_gene[0].id and gene[1].id == o_gene[1].id or random() < self.crossover_unique_gene_transfer_prob:
                             match_neuron = root_neuron.find_child(
-                                lambda n: n.id == o_gene[0].id) if o_gene[0].id != 0 else root_neuron
-                            should_insert_at_root = False
+                                lambda n: n.id == o_gene[0].id) if o_gene[0].id != 0 else False
+                            ancestor_genes = root_neuron
+                            new_syn = Synapse(o_gene[2].label
+                                              (gene[2].input + o_gene[2].input) / 2, (gene[2].weight + o_gene[2].weight) / 2, [])
                             if match_neuron is None:
-                                match_neuron = Neuron(o_gene[0].id, [Synapse(
-                                    (gene[2].input + o_gene[2].input) / 2, (gene[2].weight + o_gene[2].weight) / 2, [])])
+                                match_neuron = Neuron(o_gene[0].id, [new_syn])
                                 match_ancestor_genes = filter(
                                     lambda g: g[1].id == match_neuron.id, s_genes)
                                 if len(match_ancestor_genes) > 0:
-                                    should_insert_at_root = match_ancestor_genes[0]
-
-                            new_syn = Synapse((gene[3].input + o_gene[3].input) / 2,
-                                              (gene[3].weight + o_gene[3].weight) / 2, [])
+                                    ancestor_genes = match_ancestor_genes[0]
 
                             new_neuron = Neuron(o_gene[1].id + len(map(lambda n:
                                                                        map(lambda s: s.next_neurons, n.synapses), match_neuron)) + 1, [new_syn])
-                            if should_insert_at_root != False:
-                                should_insert_at_root[2].next_neurons = [
-                                    match_neuron]
-                                root_neuron.synapses.append(
-                                    should_insert_at_root[2])
 
+                            if ancestor_genes is root_neuron:
+                                root_neuron.synapses.append(
+                                    Synapse(new_syn.label, new_syn.input, new_syn.weight, [new_neuron]))
+                            else:
+                                ancestor_genes[2].next_neurons.append(
+                                    new_neuron)
                     if len(new_gen) == self.count_individuals:
                         break
 
         self.root_neurons = new_gen
+        self.adjust_weights(datas)
