@@ -9,3 +9,7 @@ class Data:
         self.wall_length = wall_length
         self.monster_top = monster_top
         self.monster_left = monster_left
+
+    def get_attributes(self):
+        attrs = [a for a in dir(self) if not a.startswith('__')]
+        return [a for a in attrs if a != 'id' and a != 'score']

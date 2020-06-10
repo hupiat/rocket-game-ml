@@ -8,40 +8,44 @@ class Genetic:
 
     count_individuals = 5
 
-    mutation_prob = 0.8
-    mutation_struct_prob = 0.5
+    mutation_prob = 0.2
+    mutation_struct_prob = 0.3
     crossover_unique_gene_transfer_prob = 0.2
 
-    rocket_top_weight = 1
-    wall_direction_weight = 0.5
-    wall_left_weight = 0.5
-    wall_length_weight = 0.5
-    monster_top_weight = 1
-    monster_left_weight = 1
+    weights = [1, 0.5, 0.1, 0.5, 1, 1]
+
+    last_input_datas = None
 
     def adjust_weights(self, final_datas):
-        max_score = (0, 0)
+        best = (0, 0, 0)
         for i in range(len(final_datas)):
-            if final_datas[i].score > max_score[0]:
-                max_score[0] = final_datas[i].score
-                max_score[1] = i
+            if final_datas[i].score > best[0].score:
+                best[0] = final_datas[i]
+                best[1] = self.last_input_datas[i]
+                best[2] = i
 
-        def mse(index, label):
-            total = 0
-            for i in range(len(final_datas)):
-                diff = final_datas[i][label] - self.last_input_datas[i][label]
-                total += diff * diff
-            total /= len(final_datas)
-            total -= 1 - 100 / max_score[0]
-            success = self.root_neurons[index].output > 0.5
-            if final_datas[i].wall_direction == 0:
-                success = self.root_neurons[index].output <= 0.5
-            if success:
-                self[label + '_weight'] -= total
-            else:
-                self[label + '_weight'] += total
-        for input in self.last_input_datas[0]:
-            mse(max_score[1], input.label)
+        if self.last_best is not None and self.last_best.score < best[0].score:
+            self.last_best = best[0]
+        else:
+            return
+
+        total = 0
+        for attr in best[0].get_attributes():
+            diff = best[0][attr] - best[1][attr]
+            total += diff * diff
+        total /= len(final_datas)
+
+        for i in range(len(final_datas)):
+            wall_to_bottom = final_datas[i].wall_direction == 0
+
+            def update_weight(weight):
+                if wall_to_bottom:
+                    weight -= total
+                else:
+                    weight += total
+            update_weight(self.weights[0])
+            self.root_neurons[i].adjust_weights(
+                lambda syn: update_weight(syn.weight))
 
     def gen_data(self):
         return Data(0, random(), random(), random(),
@@ -49,16 +53,16 @@ class Genetic:
 
     def map_data(self, data):
         return [
-            Synapse('rocket_top', data.rocket_top, self.rocket_top_weight, []),
+            Synapse('rocket_top', data.rocket_top, self.weights[0], []),
             Synapse('wall_direction', data.wall_direction,
-                    self.wall_direction_weight, []),
-            Synapse('wall_left', data.wall_left, self.wall_left_weight, []),
+                    self.weights[1], []),
+            Synapse('wall_left', data.wall_left, self.weights[2], []),
             Synapse('wall_length', data.wall_length,
-                    self.wall_length_weight, []),
+                    self.weights[3], []),
             Synapse('monster_top', data.monster_top,
-                    self.monster_top_weight, []),
+                    self.weights[4], []),
             Synapse('monster_left', data.monster_left,
-                    self.monster_left_weight, []),
+                    self.weights[5], []),
         ]
 
     def generation_gen(self):
@@ -68,12 +72,18 @@ class Genetic:
                 0, self.map_data(self.gen_data())))
 
     def generation_train(self, datas):
-        self.last_input_datas = datas
+        if self.last_input_datas is None:
+            self.last_input_datas = datas
         for i in range(0, len(datas)):
             data = self.map_data(datas[i])
             self.root_neurons[i].synapses = list(data)
             self.root_neurons[i].ReLU()
-            yield self.root_neurons[i].output
+            output = self.root_neurons[i].output
+            success = self.last_input_datas[i].wall_direction == 1 and output > 0.5
+            success = success or self.last_input_datas[i].wall_direction == 0 and output <= 0.5
+            if success:
+                self.last_input_datas[i] = datas[i]
+            yield output
 
     def generation_crossover(self, datas):
         new_gen = []

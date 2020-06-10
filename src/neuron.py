@@ -45,9 +45,23 @@ class Neuron:
                     iterate(next_neuron)
         iterate(self)
 
+    def adjust_weights(self, callback):
+        def iterate(neuron):
+            for syn in neuron.synapses:
+                if len(syn.next_neurons) == 0:
+                    callback(syn)
+                else:
+                    for next_neuron in syn.next_neurons:
+                        iterate(next_neuron)
+                break
+        iterate(self)
+
     def mutate(self):
-        synapse_index = randint(0, len(self.synapses) - 1)
-        self.synapses[synapse_index].weight = random()
+        def propagate(neuron, next, syn):
+            if random() > 0.5:
+                synapse_index = randint(0, len(next.synapses) - 1)
+                next.synapses[synapse_index].weight = random()
+        self.iterate_children_recursive(propagate)
         self.ReLU()
 
     def mutate_struct(self, genetic):
