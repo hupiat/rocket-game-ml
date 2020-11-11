@@ -26,7 +26,6 @@ class Handler(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == PATH_ASK or url.path == PATH_STEP:
             parsed = parse_qs(url.query)
-            print(parsed)
             hasDatas = False
             try:
                 datas = list(self.to_data(parsed.get('datas')[0]))
