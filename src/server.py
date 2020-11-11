@@ -20,8 +20,7 @@ class Handler(SimpleHTTPRequestHandler):
         dictionaries = json.loads(json_datas)
         for dict in dictionaries:
             yield Data(dict['id'], dict['score'], dict['rocket_top'],
-                       dict['wall_direction'], dict['wall_left'], dict['wall_length'],
-                       dict['monster_top'], dict['monster_left'])
+                       dict['wall_direction'], dict['wall_left'], dict['wall_length'])
 
     def do_GET(self):
         url = urlparse(self.path)
@@ -34,14 +33,16 @@ class Handler(SimpleHTTPRequestHandler):
             except TypeError:
                 pass
             self.send_response(200 if hasDatas else 404)
-            if url.path == PATH_ASK and hasDatas:
-                self.end_headers()
-                predictions = list(ask_model(datas, float(parsed.get(
-                    'max_height')[0]), float(parsed.get('max_width')[0])))
-                self.wfile.write(bytes(str(predictions), 'utf-8'))
-            elif hasDatas:
-                self.end_headers()
-                step_generation(datas)
+            if hasDatas:
+                max_height = parsed.get('max_height')[0]
+                max_width = parsed.get('max_width')[0]
+                if url.path == PATH_ASK:
+                    self.end_headers()
+                    predictions = list(ask_model(datas, max_height, max_width))
+                    self.wfile.write(bytes(str(predictions), 'utf-8'))
+                else:
+                    self.end_headers()
+                    step_generation(datas)
         elif url.path == PATH_COUNT:
             self.send_response(200)
             self.end_headers()

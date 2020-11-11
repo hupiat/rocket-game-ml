@@ -49,7 +49,7 @@ class Genetic:
 
     def gen_data(self):
         return Data(0, random(), random(), random(),
-                    1 if random() > 0.5 else 0, random(), random(), random())
+                    1 if random() > 0.5 else 0, random())
 
     def map_data(self, data):
         return [
@@ -59,10 +59,6 @@ class Genetic:
             Synapse('wall_left', data.wall_left, self.weights[2], []),
             Synapse('wall_length', data.wall_length,
                     self.weights[3], []),
-            Synapse('monster_top', data.monster_top,
-                    self.weights[4], []),
-            Synapse('monster_left', data.monster_left,
-                    self.weights[5], []),
         ]
 
     def generation_gen(self):

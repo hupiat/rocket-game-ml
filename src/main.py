@@ -11,8 +11,6 @@ def normalize(datas, max_height, max_width):
         data.rocket_top = compute(data.rocket_top, max_height, 0)
         data.wall_left = compute(data.wall_left, max_width, 0)
         data.wall_length = compute(data.wall_left, max_height, 0)
-        data.monster_top = compute(data.monster_top, max_height, 0)
-        data.monster_left = compute(data.monster_left, max_width, 0)
         if data.wall_direction > 1:
             data.wall_direction = 1
         if data.wall_direction < 0:
