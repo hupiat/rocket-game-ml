@@ -26,6 +26,7 @@ class Handler(SimpleHTTPRequestHandler):
         url = urlparse(self.path)
         if url.path == PATH_ASK or url.path == PATH_STEP:
             parsed = parse_qs(url.query)
+            print(parsed)
             hasDatas = False
             try:
                 datas = list(self.to_data(parsed.get('datas')[0]))
@@ -34,8 +35,8 @@ class Handler(SimpleHTTPRequestHandler):
                 pass
             self.send_response(200 if hasDatas else 404)
             if hasDatas:
-                max_height = parsed.get('max_height')[0]
-                max_width = parsed.get('max_width')[0]
+                max_height = float(parsed.get('max_height')[0])
+                max_width = float(parsed.get('max_width')[0])
                 if url.path == PATH_ASK:
                     self.end_headers()
                     predictions = list(ask_model(datas, max_height, max_width))
