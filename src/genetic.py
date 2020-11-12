@@ -12,7 +12,7 @@ class Genetic:
     mutation_struct_prob = 0.3
     crossover_unique_gene_transfer_prob = 0.2
 
-    weights = [1, 0.5, 0.1, 0.5, 1, 1]
+    weights = [1, 0.5, 1, 1]
 
     last_input_datas = None
     last_best = None
@@ -38,15 +38,13 @@ class Genetic:
 
         for i in range(len(final_datas)):
             wall_to_bottom = final_datas[i].wall_direction == 0
-
             def update_weight(weight):
-                if wall_to_bottom:
+                if wall_to_bottom and i != 1:
                     weight -= total
                 else:
                     weight += total
-            update_weight(self.weights[0])
-            self.root_neurons[i].adjust_weights(
-                lambda syn: update_weight(syn.weight))
+            for j in range(len(self.weights)):
+              update_weight(self.weights[j])
 
     def gen_data(self):
         return Data(0, random(), random(), random(),

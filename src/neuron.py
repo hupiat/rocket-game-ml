@@ -45,17 +45,6 @@ class Neuron:
                     iterate(next_neuron)
         iterate(self)
 
-    def adjust_weights(self, callback):
-        def iterate(neuron):
-            for syn in neuron.synapses:
-                if len(syn.next_neurons) == 0:
-                    callback(syn)
-                else:
-                    for next_neuron in syn.next_neurons:
-                        iterate(next_neuron)
-                break
-        iterate(self)
-
     def mutate(self):
         def propagate(neuron, next, syn):
             if random() > 0.5:
