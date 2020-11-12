@@ -24,7 +24,7 @@ class Genetic:
                 best[1] = self.last_input_datas[i]
                 best[2] = i
 
-        if self.last_best is not None and self.last_best.score < best[0].score:
+        if self.last_best is None or self.last_best.score < best[0].score:
             self.last_best = best[0]
         else:
             return
