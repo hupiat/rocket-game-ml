@@ -74,10 +74,6 @@ class Genetic:
             self.root_neurons[i].synapses = list(data)
             self.root_neurons[i].ReLU()
             output = self.root_neurons[i].output
-            success = self.last_input_datas[i].wall_direction == 1 and output > 0.5
-            success = success or self.last_input_datas[i].wall_direction == 0 and output <= 0.5
-            if success:
-                self.last_input_datas[i] = datas[i]
             yield output
 
     def generation_crossover(self, datas):
