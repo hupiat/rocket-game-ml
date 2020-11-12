@@ -15,6 +15,7 @@ class Genetic:
     weights = [1, 0.5, 0.1, 0.5, 1, 1]
 
     last_input_datas = None
+    last_best = None
 
     def adjust_weights(self, final_datas):
         best = (0, 0, 0)
