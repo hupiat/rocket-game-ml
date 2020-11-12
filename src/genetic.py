@@ -68,8 +68,7 @@ class Genetic:
                 0, self.map_data(self.gen_data())))
 
     def generation_train(self, datas):
-        if self.last_input_datas is None:
-            self.last_input_datas = datas
+        self.last_input_datas = datas
         for i in range(0, len(datas)):
             data = self.map_data(datas[i])
             self.root_neurons[i].synapses = list(data)
